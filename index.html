@@ -226,6 +226,44 @@
     font-family:var(--mono);font-size:.72rem;padding:8px 14px;
   }
 
+  /* 카드 추가 칸 — 주소 뒤에 #add 를 붙였을 때만 보인다 */
+  .admin{
+    margin-top:46px;padding-top:26px;
+    border-top:1px solid rgba(244,246,243,.16);
+  }
+  .admin h2{
+    font-family:var(--serif);font-size:1.5rem;font-weight:700;margin:0 0 6px;
+  }
+  .admin-note{margin:0 0 20px;color:var(--paper-dim);font-size:.82rem;max-width:52ch}
+  .admin-note code{font-family:var(--mono);color:var(--c-teal)}
+  .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+  .fields label{display:flex;flex-direction:column;gap:5px;font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;color:var(--paper-dim)}
+  .fields .wide{grid-column:1/-1}
+  .fields input,.fields select{
+    background:rgba(244,246,243,.06);
+    border:1px solid rgba(244,246,243,.22);
+    color:var(--paper);
+    font-family:var(--sans);font-size:.9rem;
+    padding:8px 9px;width:100%;
+  }
+  .fields input:focus,.fields select:focus{outline:none;border-color:var(--c-teal)}
+  .fields select option{background:var(--ink-soft);color:var(--paper)}
+  .admin-out{display:grid;grid-template-columns:170px 1fr;gap:18px;align-items:start}
+  .admin-out textarea{
+    width:100%;background:rgba(244,246,243,.06);
+    border:1px solid rgba(244,246,243,.22);
+    color:var(--paper);font-family:var(--mono);font-size:.72rem;line-height:1.6;
+    padding:10px;resize:vertical;
+  }
+  .admin-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+  .admin-actions button,.admin-actions a{
+    font-family:var(--mono);font-size:.72rem;
+    padding:9px 14px;border:0;cursor:pointer;text-decoration:none;
+    background:var(--paper);color:var(--ink);
+  }
+  .admin-actions a{background:transparent;color:var(--paper);border:1px solid rgba(244,246,243,.3)}
+  @media (max-width:560px){ .admin-out{grid-template-columns:1fr} }
+
   footer{
     margin-top:52px;padding-top:18px;
     border-top:1px solid rgba(244,246,243,.14);
@@ -266,6 +304,32 @@
   <ul class="grid" id="grid"></ul>
   <p class="none" id="none" hidden>찾는 도구가 없습니다. 다른 낱말로 찾아보세요.</p>
 
+  <section class="admin" id="admin" hidden>
+    <h2>카드 추가</h2>
+    <p class="admin-note">채우면 시트에 붙여넣을 한 줄이 만들어집니다. 복사한 뒤 시트의 빈 줄을 선택하고 붙여넣으면 칸이 알아서 나뉩니다. 이 칸은 주소 끝에 <code>#add</code>를 붙였을 때만 보이므로 학생 화면에는 나타나지 않습니다.</p>
+
+    <div class="fields">
+      <label>이름<input id="f-name" type="text" placeholder="예: 분자 구조 뷰어"></label>
+      <label>기호<input id="f-symbol" type="text" maxlength="3" placeholder="이름에서 자동"></label>
+      <label>분류
+        <select id="f-cat"></select>
+      </label>
+      <label class="wide">설명<input id="f-desc" type="text" placeholder="한 줄 설명"></label>
+      <label class="wide">주소<input id="f-url" type="url" placeholder="https://"></label>
+    </div>
+
+    <div class="admin-out">
+      <ul class="grid" id="f-preview" style="grid-template-columns:1fr"></ul>
+      <div>
+        <textarea id="f-code" rows="4" readonly></textarea>
+        <div class="admin-actions">
+          <button type="button" id="f-copy">시트 한 줄 복사</button>
+          <a id="f-sheet" href="#" target="_blank" rel="noopener">시트 열기</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer>
     <span id="count"></span>
     <span>강원특별자치도 춘천시 강서중학교</span>
@@ -281,6 +345,15 @@
    cat    : science | info | task | etc
    url    : 공유 링크 (비워 두면 '링크 넣기' 상태로 보임)
    ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   ▼ 구글 시트 연결 — 배포 후 아래 두 줄만 채우면 됩니다.
+   SHEET_API  : 앱스스크립트 웹앱 주소 (.../exec)
+   SHEET_EDIT : 시트 편집 화면 주소 (카드 추가 칸의 '시트 열기' 버튼)
+   비워 두면 아래 TOOLS 목록을 그대로 씁니다.
+   ═══════════════════════════════════════════════════════════ */
+const SHEET_API  = "https://script.google.com/macros/s/AKfycbwt7kpb1UYnym0ZVUy7MSGczwP-8bwOk9h2fpIpq18lIqVFXz86b1MtC1BrCbMEk0ws/exec";
+const SHEET_EDIT = "https://docs.google.com/spreadsheets/d/1aTAr2jlqiVc4_VndwfatCPGZwce7lN1UW4YiOJZ-sW4/edit";
+
 const CATS = {
   science:{ label:"과학·실험", tone:"var(--c-teal)",    fill:"var(--f-teal)"    },
   info:   { label:"정보·AI",   tone:"var(--c-blue)",    fill:"var(--f-blue)"    },
@@ -289,7 +362,7 @@ const CATS = {
   work:   { label:"업무·행정", tone:"var(--c-violet)",  fill:"var(--f-violet)"  }
 };
 
-const TOOLS = [
+let TOOLS = [
   { symbol:"▶", name:"유튜브 영상 분야별 모음집", desc:"분야별로 정리한 학습 영상",
     cat:"etc",
     url:"https://claude.ai/code/artifact/3fe944e3-8e95-4f65-8f06-3b3ec2f7e18c" },
@@ -316,16 +389,21 @@ const TOOLS = [
 
   { symbol:"15", name:"AI 문해력 15차시", desc:"중1 주제선택 안내사이트",
     cat:"info",
-    url:"https://mswp96-del.github.io/tool/ai15.html" }
+    url:"https://mswp96-del.github.io/tool/ai15.html" },
+
+  { symbol:"실험", name:"AI 리터러시 실험실", desc:"7월 31일 판",
+    cat:"info",
+    url:"https://script.google.com/macros/s/AKfycbydZyy4Gw3cSHJzizKEJFRpOlR0ho_iz7Jxc7zv5ptE2ZC8zxNAFTqs7dQRgS2OFmXpnw/exec" }
 ];
 /* ═══════════════════════════════════════════════════════════ */
 
 /* 링크 복사 — 3단계로 시도한다.
    1) 클립보드 API  2) 예비 execCommand  3) 직접 복사 창 */
-async function copyLink(url, btn){
+async function copyLink(url, btn, label){
+  label = label || '링크 복사';
   const flash = msg => {
     btn.textContent = msg;
-    setTimeout(()=>{ btn.textContent = '링크 복사'; }, 1600);
+    setTimeout(()=>{ btn.textContent = label; }, 1600);
   };
 
   if(navigator.clipboard && window.isSecureContext){
@@ -353,13 +431,15 @@ function showManualCopy(url){
   layer.className = 'manual';
   layer.innerHTML = `
     <div class="box">
-      <p>이 창에서는 자동 복사가 막혀 있습니다. 아래 주소를 직접 복사하세요.</p>
-      <input type="text" value="${url}" readonly>
+      <p>이 창에서는 자동 복사가 막혀 있습니다. 아래 내용을 직접 복사하세요.</p>
+      <textarea rows="4" readonly></textarea>
       <button type="button">닫기</button>
     </div>`;
   document.body.appendChild(layer);
 
-  const input = layer.querySelector('input');
+  const input = layer.querySelector('textarea');
+  input.value = url;
+  input.style.cssText = 'width:100%;font-family:var(--mono);font-size:.74rem;padding:8px;border:1px solid #C9D3D6';
   input.focus();
   input.select();
 
@@ -439,6 +519,112 @@ function render(){
 
 q.addEventListener('input',render);
 render();
+
+/* ── 구글 시트에서 목록 불러오기 ──────────────
+   JSONP로 받아 온다. 실패하면 위 TOOLS 목록이 그대로 남으므로
+   시트가 잠기거나 스크립트가 멈춰도 페이지는 비지 않는다. */
+const LABEL_TO_KEY = {};
+Object.entries(CATS).forEach(([k,c]) => { LABEL_TO_KEY[c.label] = k; });
+
+function normalizeCat(v){
+  const s = String(v||'').trim();
+  if(CATS[s]) return s;
+  if(LABEL_TO_KEY[s]) return LABEL_TO_KEY[s];
+  return 'etc';
+}
+
+function loadFromSheet(){
+  if(!SHEET_API) return;
+
+  const cbName = '__tools_' + Date.now();
+  const tag = document.createElement('script');
+  let done = false;
+
+  const cleanup = () => { delete window[cbName]; tag.remove(); };
+
+  window[cbName] = list => {
+    done = true;
+    if(Array.isArray(list) && list.length){
+      TOOLS = list
+        .filter(t => t && t.url && t.name)
+        .map(t => ({
+          symbol: (t.symbol||'').trim() || (t.name||'').replace(/\s/g,'').slice(0,2),
+          name:   String(t.name).trim(),
+          desc:   String(t.desc||'').trim(),
+          cat:    normalizeCat(t.cat),
+          url:    String(t.url).trim()
+        }));
+      render();
+    }
+    cleanup();
+  };
+
+  tag.src = SHEET_API + (SHEET_API.includes('?') ? '&' : '?') + 'callback=' + cbName;
+  tag.onerror = cleanup;
+  document.head.appendChild(tag);
+
+  setTimeout(()=>{ if(!done) cleanup(); }, 8000);
+}
+loadFromSheet();
+
+/* ── 카드 추가 칸 ───────────────────────── */
+const admin = document.getElementById('admin');
+const F = {
+  name:   document.getElementById('f-name'),
+  symbol: document.getElementById('f-symbol'),
+  desc:   document.getElementById('f-desc'),
+  cat:    document.getElementById('f-cat'),
+  url:    document.getElementById('f-url'),
+  code:   document.getElementById('f-code'),
+  copy:   document.getElementById('f-copy'),
+  preview:document.getElementById('f-preview')
+};
+
+Object.entries(CATS).forEach(([key,c])=>{
+  const o = document.createElement('option');
+  o.value = key; o.textContent = c.label;
+  F.cat.appendChild(o);
+});
+
+const esc = s => String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+const autoSymbol = name => (name||'').replace(/\s/g,'').slice(0,2) || '새';
+
+function buildCard(){
+  const name = F.name.value.trim() || '도구 이름';
+  const sym  = F.symbol.value.trim() || autoSymbol(F.name.value.trim());
+  const desc = F.desc.value.trim();
+  const cat  = F.cat.value;
+  const url  = F.url.value.trim();
+  const c    = CATS[cat];
+
+  F.code.value = [sym, name, desc, c.label, url, 'Y'].join('\t');
+
+  F.preview.innerHTML = `
+    <li class="tile" style="--tone:${c.tone};--fill:${c.fill}">
+      <a href="#" onclick="return false">
+        <span class="meta"><span>새 카드</span></span>
+        <span class="symbol">${sym}</span>
+        <p class="name">${name}</p>
+        <p class="desc">${desc || '설명'}</p>
+        <span class="cat">${c.label}</span>
+      </a>
+    </li>`;
+}
+
+['name','symbol','desc','url'].forEach(k => F[k].addEventListener('input', buildCard));
+F.cat.addEventListener('change', buildCard);
+F.copy.addEventListener('click', e => copyLink(F.code.value, e.currentTarget, '시트 한 줄 복사'));
+
+const sheetBtn = document.getElementById('f-sheet');
+if(SHEET_EDIT){ sheetBtn.href = SHEET_EDIT; }
+else{ sheetBtn.textContent = '시트 주소 미설정'; sheetBtn.removeAttribute('target'); }
+
+function toggleAdmin(){
+  admin.hidden = location.hash !== '#add';
+  if(!admin.hidden) buildCard();
+}
+window.addEventListener('hashchange', toggleAdmin);
+toggleAdmin();
 </script>
 </body>
 </html>
