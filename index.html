@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>수업 도구실 · 강서중학교</title>
+<meta name="description" content="강서중학교 과학·정보 수업에서 쓰는 웹 도구 모음">
+<meta name="theme-color" content="#16232B">
+<meta property="og:type" content="website">
+<meta property="og:title" content="수업 도구실 · 강서중학교">
+<meta property="og:description" content="수업에서 쓰는 웹 도구를 한자리에 모았습니다.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2316232B'/><rect x='5' y='5' width='10' height='10' fill='%231F8A76'/><rect x='17' y='5' width='10' height='10' fill='%232C6EA8'/><rect x='5' y='17' width='10' height='10' fill='%23C8447A'/><rect x='17' y='17' width='10' height='10' fill='%23D9822B'/></svg>">
+<style>
+  /* 강원교육서체 — 강원도교육청 X 헤움디자인 */
+  @font-face{
+    font-family:"GangwonEduModu"; font-weight:300; font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduModu/GangwonEduModu-Light.woff2") format("woff2"),
+        url("https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduModu/GangwonEduModu-Light.woff") format("woff");
+  }
+  @font-face{
+    font-family:"GangwonEduModu"; font-weight:700; font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduModu/GangwonEduModu-Bold.woff2") format("woff2"),
+        url("https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduModu/GangwonEduModu-Bold.woff") format("woff");
+  }
+  @font-face{
+    font-family:"GangwonEduPower"; font-weight:400; font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.woff2") format("woff2"),
+        url("https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.woff") format("woff");
+  }
+  @font-face{
+    font-family:"GangwonEduSaeeum"; font-weight:400; font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEduSaeeum_OTFMediumA.woff") format("woff");
+  }
+
+  :root{
+    --ink:        #16232B;
+    --ink-soft:   #1E313C;
+    --paper:      #F4F6F3;
+    --paper-dim:  #C9D3D6;
+
+    /* 분류색 — 지시약 색에서 가져옴 */
+    --c-teal:    #1F8A76;  /* 과학·실험 */
+    --c-blue:    #2C6EA8;  /* 정보·AI */
+    --c-magenta: #C8447A;  /* 평가·과제 */
+    --c-amber:   #D9822B;  /* 안내·기타 */
+    --c-violet:  #7A5FA8;  /* 업무·행정 */
+
+    /* 카드 배경용 — 흰 글씨가 읽히도록 어둡게 조정한 같은 계열 */
+    --f-teal:    #146B5C;
+    --f-blue:    #21578A;
+    --f-magenta: #A33461;
+    --f-amber:   #8E5015;
+    --f-violet:  #5C4585;
+
+    --serif:   "GangwonEduModu", "Apple SD Gothic Neo", "Malgun Gothic", serif;
+    --display: "GangwonEduPower", "GangwonEduModu", "Malgun Gothic", sans-serif;
+    --sans:    "GangwonEduSaeeum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --mono:    "GangwonEduSaeeum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.55;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:56px 24px 72px}
+
+  /* ── 머리말 ───────────────────────────── */
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:.72rem;
+    letter-spacing:.22em;
+    color:var(--c-teal);
+    margin:0 0 14px;
+  }
+  h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(2.1rem,6vw,3.4rem);
+    line-height:1.1;
+    margin:0 0 12px;
+    letter-spacing:-.01em;
+  }
+  .lede{
+    max-width:44ch;
+    margin:0;
+    color:var(--paper-dim);
+    font-size:.98rem;
+  }
+
+  .rule{
+    height:1px;
+    background:linear-gradient(90deg,var(--c-teal),var(--c-blue),var(--c-magenta),var(--c-amber));
+    opacity:.5;
+    margin:36px 0 22px;
+  }
+
+  /* ── 도구 막대: 검색 + 분류 ─────────────── */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px 22px;
+    align-items:flex-end;
+    justify-content:space-between;
+    margin-bottom:26px;
+  }
+  .search{display:flex;flex-direction:column;gap:6px;min-width:220px;flex:1 1 240px}
+  .search label{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;color:var(--paper-dim)}
+  .search input{
+    background:transparent;
+    border:0;
+    border-bottom:1px solid rgba(244,246,243,.28);
+    color:var(--paper);
+    font-family:var(--mono);
+    font-size:.95rem;
+    padding:6px 2px;
+    width:100%;
+  }
+  .search input::placeholder{color:rgba(201,211,214,.45)}
+  .search input:focus{outline:none;border-bottom-color:var(--c-teal)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;
+    background:transparent;
+    border:1px solid rgba(244,246,243,.2);
+    border-radius:2px;
+    color:var(--paper-dim);
+    font-family:var(--mono);
+    font-size:.72rem;
+    padding:6px 11px;
+    cursor:pointer;
+  }
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .chip[aria-pressed="true"]{color:var(--paper);border-color:currentColor;background:rgba(244,246,243,.06)}
+  .chip:focus-visible{outline:2px solid var(--c-teal);outline-offset:2px}
+
+  /* ── 타일 격자 ──────────────────────────── */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(158px,1fr));
+    gap:10px;
+    list-style:none;padding:0;margin:0;
+  }
+  .tile{position:relative}
+  .tile a{
+    display:flex;flex-direction:column;
+    height:100%;min-height:168px;
+    background:var(--fill);
+    color:#fff;
+    text-decoration:none;
+    padding:12px 12px 14px;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .tile a:hover,.tile a:focus-visible{
+    transform:translateY(-3px);
+    box-shadow:inset 0 0 0 999px rgba(255,255,255,.1), 0 10px 24px rgba(0,0,0,.4);
+    outline:none;
+  }
+  .tile a:focus-visible{box-shadow:inset 0 0 0 999px rgba(255,255,255,.1), 0 0 0 2px var(--paper), 0 10px 24px rgba(0,0,0,.4)}
+  .meta{display:flex;justify-content:flex-start;align-items:center;font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums}
+  .cat{
+    margin-top:auto;padding-top:10px;
+    font-family:var(--mono);font-size:.64rem;
+    letter-spacing:.08em;
+    color:rgba(255,255,255,.78);
+  }
+  .symbol{
+    font-family:var(--display);
+    font-size:2.05rem;
+    line-height:1.05;
+    margin:14px 0 8px;
+    color:#fff;
+  }
+  .name{font-size:.82rem;font-weight:700;margin:0}
+  .desc{font-size:.7rem;color:rgba(255,255,255,.8);margin:3px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+  /* 링크가 아직 없는 자리 */
+  .tile.empty a{
+    background:transparent;
+    color:var(--paper-dim);
+    border:1px dashed var(--tone);
+    cursor:default;
+  }
+  .tile.empty a:hover{transform:none;box-shadow:none}
+  .tile.empty .symbol,.tile.empty .name{color:var(--paper-dim)}
+  .tile.empty .desc{color:rgba(201,211,214,.6)}
+
+  .copy{
+    position:absolute;top:8px;right:8px;
+    background:rgba(255,255,255,.18);
+    border:0;border-radius:2px;
+    font-family:var(--mono);font-size:.6rem;
+    color:#fff;
+    padding:3px 6px;
+    cursor:pointer;
+    opacity:0;transition:opacity .15s;
+  }
+  .tile:hover .copy,.copy:focus-visible{opacity:1}
+  .copy:focus-visible{outline:2px solid var(--paper)}
+
+  .none{
+    font-family:var(--mono);font-size:.85rem;color:var(--paper-dim);
+    padding:34px 0;
+  }
+
+  .manual{
+    position:fixed;inset:0;z-index:50;
+    background:rgba(10,18,23,.84);
+    display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .manual .box{background:var(--paper);color:var(--ink);width:100%;max-width:420px;padding:20px}
+  .manual p{margin:0 0 12px;font-size:.86rem;line-height:1.5}
+  .manual input{
+    width:100%;padding:8px;
+    font-family:var(--mono);font-size:.76rem;
+    border:1px solid #C9D3D6;background:#fff;color:var(--ink);
+  }
+  .manual button{
+    margin-top:14px;border:0;cursor:pointer;
+    background:var(--ink);color:var(--paper);
+    font-family:var(--mono);font-size:.72rem;padding:8px 14px;
+  }
+
+  footer{
+    margin-top:52px;padding-top:18px;
+    border-top:1px solid rgba(244,246,243,.14);
+    font-family:var(--mono);font-size:.68rem;color:rgba(201,211,214,.7);
+    display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between;
+  }
+
+  @media (max-width:520px){
+    .wrap{padding:40px 18px 56px}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:8px}
+    .tile a{min-height:150px}
+    .symbol{font-size:1.7rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+  }
+  .tile{animation:up .4s ease both}
+  @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">강서중학교 · 과학 / 정보</p>
+  <h1>수업 도구실</h1>
+  <p class="lede">수업에서 쓰는 웹 도구를 한자리에 모았습니다. 태블릿이나 휴대전화에서 타일을 눌러 바로 여세요.</p>
+
+  <div class="rule"></div>
+
+  <div class="controls">
+    <div class="search">
+      <label for="q">찾기</label>
+      <input id="q" type="search" placeholder="이름이나 내용으로 찾기" autocomplete="off">
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="분류 고르기"></div>
+  </div>
+
+  <ul class="grid" id="grid"></ul>
+  <p class="none" id="none" hidden>찾는 도구가 없습니다. 다른 낱말로 찾아보세요.</p>
+
+  <footer>
+    <span id="count"></span>
+    <span>강원특별자치도 춘천시 강서중학교</span>
+  </footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ▼ 이 부분만 고치면 됩니다.
+   symbol : 타일에 크게 보일 1~3글자 (원소 기호처럼)
+   name   : 도구 이름
+   desc   : 한 줄 설명
+   cat    : science | info | task | etc
+   url    : 공유 링크 (비워 두면 '링크 넣기' 상태로 보임)
+   ═══════════════════════════════════════════════════════════ */
+const CATS = {
+  science:{ label:"과학·실험", tone:"var(--c-teal)",    fill:"var(--f-teal)"    },
+  info:   { label:"정보·AI",   tone:"var(--c-blue)",    fill:"var(--f-blue)"    },
+  task:   { label:"평가·과제", tone:"var(--c-magenta)", fill:"var(--f-magenta)" },
+  etc:    { label:"안내·기타", tone:"var(--c-amber)",   fill:"var(--f-amber)"   },
+  work:   { label:"업무·행정", tone:"var(--c-violet)",  fill:"var(--f-violet)"  }
+};
+
+const TOOLS = [
+  { symbol:"▶", name:"유튜브 영상 분야별 모음집", desc:"분야별로 정리한 학습 영상",
+    cat:"etc",
+    url:"https://claude.ai/code/artifact/3fe944e3-8e95-4f65-8f06-3b3ec2f7e18c" },
+
+  { symbol:"독서", name:"과학독서 × AI", desc:"10차시 방과후 프로그램",
+    cat:"info",
+    url:"https://claude.ai/code/artifact/e13b6c7b-73e9-480d-b8d2-fdb89c65c80c" },
+
+  { symbol:"뉴스", name:"오늘의 뉴스", desc:"매일 오전 7시 자동 갱신",
+    cat:"etc",
+    url:"https://mswp96-del.github.io/daily-news2/" },
+
+  { symbol:"공문", name:"공문 할일", desc:"처리할 공문 목록 관리",
+    cat:"work",
+    url:"https://script.google.com/macros/s/AKfycbzb4NrS3Wc4vgrzkQ08bx5cGDgdXcpoPlqVktczMg2NkXU6kdA_UkyyGnBmj9QJTHP8Ew/exec" }
+];
+/* ═══════════════════════════════════════════════════════════ */
+
+/* 링크 복사 — 3단계로 시도한다.
+   1) 클립보드 API  2) 예비 execCommand  3) 직접 복사 창 */
+async function copyLink(url, btn){
+  const flash = msg => {
+    btn.textContent = msg;
+    setTimeout(()=>{ btn.textContent = '링크 복사'; }, 1600);
+  };
+
+  if(navigator.clipboard && window.isSecureContext){
+    try{ await navigator.clipboard.writeText(url); return flash('복사했습니다'); }
+    catch{ /* 다음 방법으로 */ }
+  }
+
+  const ta = document.createElement('textarea');
+  ta.value = url;
+  ta.setAttribute('readonly','');
+  ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';
+  document.body.appendChild(ta);
+  ta.select();
+  ta.setSelectionRange(0, url.length);
+  let ok = false;
+  try{ ok = document.execCommand('copy'); }catch{}
+  document.body.removeChild(ta);
+  if(ok) return flash('복사했습니다');
+
+  showManualCopy(url);
+}
+
+function showManualCopy(url){
+  const layer = document.createElement('div');
+  layer.className = 'manual';
+  layer.innerHTML = `
+    <div class="box">
+      <p>이 창에서는 자동 복사가 막혀 있습니다. 아래 주소를 직접 복사하세요.</p>
+      <input type="text" value="${url}" readonly>
+      <button type="button">닫기</button>
+    </div>`;
+  document.body.appendChild(layer);
+
+  const input = layer.querySelector('input');
+  input.focus();
+  input.select();
+
+  const close = () => {
+    layer.remove();
+    document.removeEventListener('keydown', onKey);
+  };
+  const onKey = e => { if(e.key === 'Escape') close(); };
+
+  layer.querySelector('button').addEventListener('click', close);
+  layer.addEventListener('click', e => { if(e.target === layer) close(); });
+  document.addEventListener('keydown', onKey);
+}
+
+const grid = document.getElementById('grid');
+const none = document.getElementById('none');
+const q = document.getElementById('q');
+const chipBox = document.getElementById('chips');
+const countEl = document.getElementById('count');
+let active = null;
+
+Object.entries(CATS).forEach(([key,c])=>{
+  const b = document.createElement('button');
+  b.className='chip'; b.type='button';
+  b.style.color=c.tone;
+  b.setAttribute('aria-pressed','false');
+  b.innerHTML = `<span class="dot"></span>${c.label}`;
+  b.addEventListener('click',()=>{
+    active = active===key ? null : key;
+    [...chipBox.children].forEach((el,i)=>
+      el.setAttribute('aria-pressed', Object.keys(CATS)[i]===active));
+    render();
+  });
+  chipBox.appendChild(b);
+});
+
+function render(){
+  const term = q.value.trim().toLowerCase();
+  const shown = TOOLS.filter((t,i)=>{
+    if(active && t.cat!==active) return false;
+    if(!term) return true;
+    return (t.name+t.desc+t.symbol).toLowerCase().includes(term);
+  });
+
+  grid.innerHTML='';
+  shown.forEach((t,i)=>{
+    const cat = CATS[t.cat] || CATS.etc;
+    const no = String(TOOLS.indexOf(t)+1).padStart(2,'0');
+    const li = document.createElement('li');
+    li.className = 'tile' + (t.url ? '' : ' empty');
+    li.style.setProperty('--tone',cat.tone);
+    li.style.setProperty('--fill',cat.fill || cat.tone);
+    li.style.animationDelay = (i*35)+'ms';
+    li.innerHTML = `
+      <a ${t.url?`href="${t.url}" target="_blank" rel="noopener"`:'aria-disabled="true"'}>
+        <span class="meta"><span>${no}</span></span>
+        <span class="symbol">${t.symbol}</span>
+        <p class="name">${t.name}</p>
+        <p class="desc">${t.url ? t.desc : '링크 넣기'}</p>
+        <span class="cat">${cat.label}</span>
+      </a>
+      ${t.url?'<button class="copy" type="button">링크 복사</button>':''}`;
+    if(t.url){
+      li.querySelector('.copy').addEventListener('click',e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        copyLink(t.url, e.currentTarget);
+      });
+    }
+    grid.appendChild(li);
+  });
+
+  none.hidden = shown.length>0;
+  const ready = TOOLS.filter(t=>t.url).length;
+  countEl.textContent = `도구 ${TOOLS.length}개 · 링크 연결 ${ready}개`;
+}
+
+q.addEventListener('input',render);
+render();
+</script>
+</body>
+</html>
