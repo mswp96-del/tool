@@ -271,6 +271,13 @@
     display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between;
   }
 
+  #admin-toggle{
+    background:transparent;border:1px solid rgba(244,246,243,.28);
+    color:var(--paper-dim);font-family:var(--mono);font-size:.68rem;
+    padding:5px 11px;cursor:pointer;
+  }
+  #admin-toggle:hover,#admin-toggle:focus-visible{color:var(--paper);border-color:var(--c-teal);outline:none}
+
   @media (max-width:520px){
     .wrap{padding:40px 18px 56px}
     .grid{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:8px}
@@ -332,6 +339,7 @@
 
   <footer>
     <span id="count"></span>
+    <button type="button" id="admin-toggle">＋ 카드 추가</button>
     <span>강원특별자치도 춘천시 강서중학교</span>
   </footer>
 </div>
@@ -621,9 +629,22 @@ else{ sheetBtn.textContent = '시트 주소 미설정'; sheetBtn.removeAttribute
 
 function toggleAdmin(){
   admin.hidden = location.hash !== '#add';
+  const btn = document.getElementById('admin-toggle');
+  if(btn) btn.textContent = admin.hidden ? '＋ 카드 추가' : '× 닫기';
   if(!admin.hidden) buildCard();
 }
 window.addEventListener('hashchange', toggleAdmin);
+
+document.getElementById('admin-toggle').addEventListener('click', () => {
+  if(admin.hidden){
+    location.hash = '#add';
+    setTimeout(()=>admin.scrollIntoView({behavior:'smooth', block:'start'}), 60);
+  }else{
+    history.replaceState(null, '', location.pathname + location.search);
+    toggleAdmin();
+  }
+});
+
 toggleAdmin();
 </script>
 </body>
