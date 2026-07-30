@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 문해력 과세특 생성기 · 독서화랑 × 자작자작</title>
+<style>
+  :root{
+    --ink:#1a2233; --sub:#5b6b82; --line:#e6e9f0; --bg:#f4f6fb; --card:#ffffff;
+    --orange:#f79008; --orange-d:#d97706; --teal:#12b5b0; --blue:#2563eb;
+    --soft:#fff7ec; --soft2:#effcfb; --ok:#16a34a; --warn:#dc2626;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Pretendard','Malgun Gothic',-apple-system,system-ui,sans-serif;
+    background:var(--bg);color:#1a2233;line-height:1.6;-webkit-font-smoothing:antialiased}
+  header.top{background:linear-gradient(100deg,#0f172a,#1e293b);color:#fff;padding:22px 28px}
+  header.top h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.3px}
+  header.top p{margin:6px 0 0;font-size:13px;color:#c7d2fe}
+  .badges{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+  .badge{font-size:11.5px;padding:3px 10px;border-radius:999px;font-weight:700}
+  .badge.o{background:rgba(247,144,8,.22);color:#fdba74}
+  .badge.t{background:rgba(18,181,176,.22);color:#5eead4}
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 18px 60px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:920px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;
+    box-shadow:0 1px 3px rgba(16,24,40,.04)}
+  .card h2{margin:0 0 4px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .card .hint{font-size:12.5px;color:#64748b;margin:0 0 14px}
+  .dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+  .dot.o{background:var(--orange)} .dot.t{background:var(--teal)} .dot.b{background:var(--blue)}
+  label{display:block;font-size:12.5px;font-weight:700;color:#334155;margin:12px 0 5px}
+  label .tag{font-weight:600;color:#94a3b8;font-size:11px;margin-left:4px}
+  input[type=text],textarea,select{width:100%;border:1px solid #d7dbe5;border-radius:10px;
+    padding:9px 11px;font-size:13.5px;font-family:inherit;color:#1a2233;background:#fff}
+  textarea{resize:vertical;min-height:60px;line-height:1.55}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--orange);
+    box-shadow:0 0 0 3px rgba(247,144,8,.12)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .sect{border-left:3px solid var(--orange);padding-left:10px;margin:18px 0 4px;
+    font-weight:800;font-size:13.5px;color:#0f172a}
+  .sect.tealb{border-color:var(--teal)}
+  .sect.blueb{border-color:var(--blue)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+  .chip{border:1px solid #d7dbe5;background:#fff;border-radius:999px;padding:6px 12px;
+    font-size:12px;cursor:pointer;user-select:none;transition:.12s}
+  .chip:hover{border-color:var(--orange)}
+  .chip.on{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:700}
+  button.act{border:none;border-radius:11px;padding:12px 16px;font-size:14px;font-weight:800;
+    cursor:pointer;color:#fff;background:var(--orange)}
+  button.act:hover{background:var(--orange-d)}
+  button.ghost{background:#fff;color:#334155;border:1px solid #d7dbe5;border-radius:10px;
+    padding:9px 13px;font-size:12.5px;font-weight:700;cursor:pointer}
+  button.ghost:hover{border-color:#94a3b8}
+  .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .tab{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;
+    background:#eef1f7;color:#475569}
+  .tab.on{background:#0f172a;color:#fff}
+  .out{background:#0f172a;border-radius:12px;padding:16px;color:#e2e8f0;font-size:14px;
+    line-height:1.75;white-space:pre-wrap;min-height:80px}
+  .outblock{margin-bottom:14px}
+  .outhead{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px}
+  .outhead .name{font-weight:800;font-size:13px;color:#0f172a}
+  .counter{font-size:11.5px;color:#64748b}
+  .counter b{color:#0f172a}
+  .counter .over{color:var(--warn)}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0}
+  .sheetbar{background:var(--soft);border:1px solid #fde4bf;border-radius:12px;padding:14px;margin-bottom:16px}
+  .sheetbar .row{display:grid;grid-template-columns:1.4fr 1fr auto;gap:10px;align-items:end}
+  @media(max-width:720px){.sheetbar .row{grid-template-columns:1fr}}
+  .stlist{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+  .stlist table{width:100%;border-collapse:collapse;font-size:13px}
+  .stlist th{position:sticky;top:0;background:#f1f5f9;text-align:left;padding:8px 10px;font-size:12px;color:#475569}
+  .stlist td{padding:7px 10px;border-top:1px solid #eef1f7}
+  .stlist tr{cursor:pointer}
+  .stlist tr:hover{background:#fff7ec}
+  .stlist tr.sel{background:#fff2dd}
+  .note{font-size:12px;color:#64748b;background:#f8fafc;border:1px solid var(--line);
+    border-radius:10px;padding:11px 13px;margin-top:12px}
+  .msg{font-size:12.5px;padding:9px 12px;border-radius:9px;margin-top:8px;display:none}
+  .msg.show{display:block}
+  .msg.err{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+  .msg.ok{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+  details{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fafbfe}
+  summary{cursor:pointer;font-weight:700;font-size:13px;color:#334155}
+  details p,details li{font-size:12.5px;color:#475569}
+  code{background:#eef1f7;padding:1px 6px;border-radius:5px;font-size:12px}
+  .footer{max-width:1180px;margin:14px auto 0;padding:0 18px;font-size:11.5px;color:#94a3b8}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:720px){.split{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>AI 문해력 과세특 생성기</h1>
+  <p>독서화랑 독서활동 · 자작자작 글쓰기 기록을 역량 강조체 과세특 초안으로</p>
+  <div class="badges">
+    <span class="badge o">독서화랑 · 독서노트/어휘/평점</span>
+    <span class="badge t">자작자작 · 글쓰기/피드백</span>
+    <span class="badge o">구글시트 연동 + 직접입력</span>
+    <span class="badge t">문장 생성 + AI 프롬프트</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 구글 시트 연동 -->
+  <div class="sheetbar">
+    <div style="font-weight:800;font-size:14px;margin-bottom:4px">① 구글 시트 연동 <span style="font-weight:600;color:#b45309;font-size:12px">(선택) — 반 전체를 한 번에</span></div>
+    <div style="font-size:12px;color:#7c5410;margin-bottom:10px">기본 시트가 미리 설정되어 <b>열 때 자동으로 불러옵니다.</b> 다른 시트를 쓰려면 값을 바꿔 「불러오기」 하세요. (기본값은 파일 상단 <code>CFG_SHEET_ID</code>에서 영구 변경) · 시트는 <b>[공유 → 링크 있는 모든 사용자: 뷰어]</b> 필요</div>
+    <div class="row">
+      <div>
+        <label style="margin-top:0">SHEET_ID <span class="tag">구글시트 URL의 /d/ 와 /edit 사이 값</span></label>
+        <input type="text" id="sheetId" placeholder="예: 1A2b3C...xyz">
+      </div>
+      <div>
+        <label style="margin-top:0">시트 이름 <span class="tag">탭 이름</span></label>
+        <input type="text" id="sheetName" placeholder="예: 과세특자료">
+      </div>
+      <div><button class="act" id="loadBtn" style="width:100%">불러오기</button></div>
+    </div>
+    <div class="msg" id="sheetMsg"></div>
+    <div id="stWrap" style="display:none;margin-top:12px">
+      <div class="stlist"><table id="stTable"><thead><tr><th>반</th><th>번호</th><th>이름</th><th>독서</th><th>글쓰기</th></tr></thead><tbody id="stBody"></tbody></table></div>
+      <div style="font-size:11.5px;color:#7c5410;margin-top:6px">학생을 클릭하면 아래 입력란에 자동으로 채워집니다.</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- 입력 -->
+    <div class="card">
+      <h2><span class="dot o"></span> ② 학생 활동 입력</h2>
+      <p class="hint">독서화랑·자작자작에서 확인한 내용을 옮겨 적으세요. 빈칸은 자동으로 제외됩니다.</p>
+
+      <div class="row3">
+        <div><label>반</label><input type="text" id="f_class" placeholder="1반"></div>
+        <div><label>번호</label><input type="text" id="f_no" placeholder="2"></div>
+        <div><label>이름</label><input type="text" id="f_name" placeholder="김○○"></div>
+      </div>
+
+      <div class="sect">📚 독서화랑 · 독서활동</div>
+      <div class="row2">
+        <div><label>독서레벨 <span class="tag">진단</span></label><input type="text" id="f_level" placeholder="Lv.29"></div>
+        <div><label>완독 권수</label><input type="text" id="f_books_n" placeholder="3"></div>
+      </div>
+      <label>완독 도서 <span class="tag">제목(저자) 쉼표로</span></label>
+      <textarea id="f_books" placeholder="보물섬(스티븐슨), 걸리버 여행기, 편의점을 털어라! 수학"></textarea>
+      <label>독서노트 핵심 서술 <span class="tag">학생이 쓴 생각·근거를 그대로</span></label>
+      <textarea id="f_note" placeholder="예) '보물섬 지도를 발견해도 지금 삶에 만족하므로 떠나지 않겠다'며 자신의 가치관을 근거를 들어 서술함"></textarea>
+      <div class="row2">
+        <div><label>도서평점·추천 이유 <span class="tag">선택</span></label><textarea id="f_rate" placeholder="가장 인상 깊은 책과 이유"></textarea></div>
+        <div><label>어휘통장·독서태도 <span class="tag">선택</span></label><textarea id="f_voca" placeholder="새 어휘 15개 정리 / 꾸준한 독서 등"></textarea></div>
+      </div>
+
+      <div class="sect tealb">✍️ 자작자작 · 글쓰기+피드백</div>
+      <label>글 주제·제목</label>
+      <input type="text" id="f_wtitle" placeholder="예: AI, 친구인가 도구인가">
+      <label>글의 핵심 내용·주장 <span class="tag">요지</span></label>
+      <textarea id="f_wbody" placeholder="학생 글에서 드러난 주장과 근거의 요지"></textarea>
+      <div class="row2">
+        <div><label>받은 피드백 요지</label><textarea id="f_fb" placeholder="상호/AI/교사 피드백의 핵심"></textarea></div>
+        <div><label>피드백 반영·퇴고</label><textarea id="f_fb2" placeholder="피드백을 어떻게 반영해 글이 좋아졌는지"></textarea></div>
+      </div>
+
+      <div class="sect blueb">🧭 수업활동 · 관찰</div>
+      <div class="row2">
+        <div><label>정보 판별·검증 사례 <span class="tag">환각/가짜뉴스</span></label><textarea id="f_verify" placeholder="AI 답을 교차검증한 사례 등"></textarea></div>
+        <div><label>AI 윤리·태도 <span class="tag">편향/저작권/개인정보</span></label><textarea id="f_ethic" placeholder="윤리 토론·규칙 만들기 등"></textarea></div>
+      </div>
+      <div class="row2">
+        <div><label>프로젝트·산출물</label><textarea id="f_proj" placeholder="AI 협업 결과물 주제·역할"></textarea></div>
+        <div><label>토론·협업 기여 / 성찰</label><textarea id="f_disc" placeholder="토론 기여, 전-후 성장 등"></textarea></div>
+      </div>
+
+      <div class="sect">⭐ 강조할 역량 <span class="tag" style="font-weight:600">(문장에서 부각됩니다)</span></div>
+      <div class="chips" id="compChips"></div>
+
+      <label style="margin-top:16px">교사 관찰 메모 <span class="tag">한 줄 특기사항, 선택</span></label>
+      <input type="text" id="f_memo" placeholder="예: 리더십, 성실함, 급성장 등">
+
+      <div class="toolbar" style="margin-bottom:0">
+        <button class="act" id="genBtn">과세특 생성 ▶</button>
+        <button class="ghost" id="clearBtn">입력 비우기</button>
+      </div>
+    </div>
+
+    <!-- 출력 -->
+    <div class="card">
+      <h2><span class="dot b"></span> ③ 결과</h2>
+      <p class="hint">역량 강조체 초안입니다. 사실 확인 후 교사가 다듬어 기재하세요. 생성은 참고용입니다.</p>
+
+      <div class="tabs">
+        <div class="tab on" data-t="draft">문장 초안</div>
+        <div class="tab" data-t="prompt">AI 프롬프트</div>
+      </div>
+
+      <!-- 바이트 설정 -->
+      <div class="split" style="margin-bottom:12px">
+        <div><label style="margin-top:0">글자 수 목표 <span class="tag">권장 500자</span></label><input type="text" id="limitChar" value="500"></div>
+        <div><label style="margin-top:0">문체</label>
+          <select id="style">
+            <option value="obs">역량 강조 · 관찰 담백체 (권장)</option>
+            <option value="warm">역량 강조 · 서술 확장체</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="paneDraft">
+        <div class="out" id="draftOut">왼쪽에 학생 활동을 입력하고 <b>과세특 생성</b>을 누르면 3가지 초안이 나옵니다.</div>
+        <div class="toolbar" id="draftTools" style="display:none">
+          <button class="ghost" data-copy="0">초안 1 복사</button>
+          <button class="ghost" data-copy="1">초안 2 복사</button>
+          <button class="ghost" data-copy="2">초안 3 복사</button>
+          <button class="ghost" id="regen">다시 생성 🎲</button>
+        </div>
+        <div class="msg" id="copyMsg"></div>
+      </div>
+
+      <div id="panePrompt" style="display:none">
+        <div class="out" id="promptOut" style="background:#111827;color:#cbd5e1">학생 활동을 입력한 뒤 표시됩니다. 이 프롬프트를 Gemini·Claude 등에 붙여넣으면 맞춤 과세특을 받을 수 있어요.</div>
+        <div class="toolbar"><button class="ghost" id="copyPrompt">프롬프트 복사</button></div>
+      </div>
+
+      <details>
+        <summary>📄 구글 시트 열(양식) 설계 — 새로 만드는 법</summary>
+        <p>새 구글 시트 1행(머리글)에 아래 열을 순서 상관없이 넣으세요. 앱이 <b>열 이름</b>으로 자동 인식합니다.</p>
+        <p><b>기본</b> · <code>반</code> <code>번호</code> <code>이름</code><br>
+        <b>독서화랑</b> · <code>독서레벨</code> <code>완독권수</code> <code>완독도서</code> <code>독서노트</code> <code>도서평점</code> <code>어휘태도</code><br>
+        <b>자작자작</b> · <code>글제목</code> <code>글내용</code> <code>피드백</code> <code>피드백반영</code><br>
+        <b>수업활동</b> · <code>정보판별</code> <code>윤리태도</code> <code>프로젝트</code> <code>토론성찰</code><br>
+        <b>기타</b> · <code>강조역량</code>(쉼표로: 예 정보판별력,표현력) <code>교사메모</code></p>
+        <p>2행부터 학생별로 채우고, <b>공유 → 링크 있는 모든 사용자 뷰어</b>로 설정한 뒤 위 ①에 SHEET_ID·시트이름을 넣으면 반 전체를 불러옵니다.</p>
+      </details>
+    </div>
+  </div>
+</div>
+
+<div class="footer">과세특 생성기 v1 · 독서화랑 × 자작자작 연계 · 생성 결과는 참고용 초안이며 반드시 교사가 사실 확인·수정 후 기재하세요. 개인정보가 담긴 시트는 접근 권한을 학교 정책에 맞게 관리하세요.</div>
+
+<script>
+/* ============================================================
+   ★ 기본 설정 — 여기 한 번만 바꾸면 매번 입력할 필요가 없습니다.
+   시트가 바뀌면 아래 두 값만 새 값으로 교체하세요.
+   ============================================================ */
+const CFG_SHEET_ID   = "118xWGR95ofWlyU1cmntZ7Ab-cgMoqoi3zXtB1XEB5z8"; // 구글시트 URL의 /d/ 와 /edit 사이 값
+const CFG_SHEET_NAME = "과세특자료";      // 탭 이름 (또는 gid 숫자)
+const CFG_AUTOLOAD   = true;               // 열 때 자동 불러오기 (원치 않으면 false)
+
+/* ---------- 역량 목록 ---------- */
+const COMPETENCIES = ["정보 판별력","비판적 사고","질문·탐구력","독서·문해력","표현·글쓰기력","디지털 윤리의식","창의적 활용","협업·소통","자기주도·성찰"];
+const chipWrap=document.getElementById('compChips');
+COMPETENCIES.forEach(c=>{const el=document.createElement('div');el.className='chip';el.textContent=c;
+  el.onclick=()=>el.classList.toggle('on');chipWrap.appendChild(el);});
+
+/* ---------- 유틸 ---------- */
+const $=id=>document.getElementById(id);
+const val=id=>($(id)?$(id).value.trim():'');
+function byteLen(s){let b=0;for(const ch of s){b += ch.charCodeAt(0)>127?3:1;}return b;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function firstBook(s){if(!s)return '';const t=s.split(/[,·、\n]/)[0].trim();return t.replace(/\(.*?\)/,'').trim();}
+function clean(s){return s.replace(/\s+/g,' ').replace(/["“”'']/g,'').trim();}
+function norm(s){return clean(s).replace(/[.\s·,]+$/,'');}
+function asSent(s){const t=norm(s);return t?(/[.!?]$/.test(t)?t:t+'.'):'';}
+function josa(w,kind){ // eul 을/를, i 이/가, eun 은/는, wa 와/과, ro (으)로
+  if(!w)return '';const c=w.charCodeAt(w.length-1);let jong=false,rieul=false;
+  if(c>=0xAC00&&c<=0xD7A3){const j=(c-0xAC00)%28;jong=j!==0;rieul=j===8;}
+  else if(/[0-9]$/.test(w)){jong='013678'.includes(w.slice(-1))?false:false;} // 숫자는 받침없음 취급
+  switch(kind){case 'eul':return w+(jong?'을':'를');case 'i':return w+(jong?'이':'가');
+    case 'eun':return w+(jong?'은':'는');case 'wa':return w+(jong?'과':'와');
+    case 'ro':return w+((!jong||rieul)?'로':'으로');}return w;}
+
+/* ---------- 데이터 수집 ---------- */
+function collect(){
+  return {
+    cls:val('f_class'),no:val('f_no'),name:val('f_name'),
+    level:val('f_level'),booksN:val('f_books_n'),books:val('f_books'),
+    note:val('f_note'),rate:val('f_rate'),voca:val('f_voca'),
+    wtitle:val('f_wtitle'),wbody:val('f_wbody'),fb:val('f_fb'),fb2:val('f_fb2'),
+    verify:val('f_verify'),ethic:val('f_ethic'),proj:val('f_proj'),disc:val('f_disc'),
+    memo:val('f_memo'),
+    comps:[...document.querySelectorAll('.chip.on')].map(c=>c.textContent)
+  };
+}
+
+/* ---------- 문장 생성 ---------- */
+function sentences(d,style){
+  const S=[]; const warm = style==='warm';
+  const book = firstBook(d.books);
+  // 독서
+  if(d.books || d.note){
+    const leads = book
+      ? [`${josa(book,'eul')} 비롯한 주제 도서를 완독하며`, `${josa(book,'eul')} 깊이 있게 읽으며`, `${josa(book,'eul')} 완독하는 등 꾸준히 책을 읽으며`]
+      : [`주제 도서를 꾸준히 완독하며`, `여러 권의 책을 성실히 읽어내며`];
+    const lead = pick(leads);
+    if(d.note){
+      S.push(`${lead} 자신의 생각을 독서노트에 근거를 들어 기록함.`);
+      S.push(asSent(d.note));
+      S.push(pick([`텍스트를 자기 언어로 재구성하는 문해력이 돋보임.`,`책의 내용을 자신의 삶과 연결해 해석하는 문해력이 성장함.`]));
+    }else{
+      S.push(`${lead} 핵심 내용을 자기 언어로 정리하는 독서 태도가 성실함.`);
+    }
+  }
+  if(d.voca){S.push(`${norm(d.voca)} 등 어휘와 표현을 넓혀가며 읽기의 폭을 확장함.`);}
+  if(d.rate){S.push(`${norm(d.rate)} 등 자신의 독서 경험을 근거로 책을 평가하는 안목을 보임.`);}
+  // 정보판별
+  if(d.verify){S.push(`AI가 생성한 정보를 무비판적으로 수용하지 않고 ${norm(d.verify)}, 출처를 확인하고 교차검증하는 정보 판별력이 뛰어남.`);}
+  // 윤리
+  if(d.ethic){S.push(`${josa(norm(d.ethic),'eul')} 통해 AI의 편향과 저작권·개인정보 문제를 책임 있게 인식하는 디지털 윤리의식을 기름.`);}
+  // 자작자작 글쓰기
+  if(d.wtitle || d.wbody){
+    const t = d.wtitle?`${josa(norm(d.wtitle),'eul')} 주제로 글을 쓰며 `:`자신의 생각을 글로 풀어내며 `;
+    S.push(`${t}논리적 표현력과 서사적 사고를 발휘함.`);
+    if(d.wbody) S.push(asSent(d.wbody));
+  }
+  if(d.fb || d.fb2){
+    const a=d.fb?`${norm(d.fb)} 등의 피드백을 반영하여 `:`동료·교사의 피드백을 적극 수용하여 `;
+    const b=d.fb2?`${norm(d.fb2)}, `:``;
+    S.push(`${a}${b}글을 스스로 다듬어 완성도를 높이는 성찰과 자기주도성이 인상적임.`);
+  }
+  // 프로젝트/토론
+  if(d.proj){S.push(`${norm(d.proj)} 활동에서 AI를 도구로 활용해 목적에 맞는 결과물을 창의적으로 완성함.`);}
+  if(d.disc){S.push(`${norm(d.disc)} 등 협업 과정에서 의견을 나누고 배움을 연결하는 태도를 보임.`);}
+  // 종합 역량 문장
+  if(d.comps.length){
+    const cs=d.comps.slice(0,3).join('·');
+    const closers=[
+      `이러한 활동을 통해 ${cs} 등의 역량에서 고른 성장을 보이며 AI 시대에 요구되는 문해력의 토대를 다짐.`,
+      `일련의 과정에서 ${cs} 역량이 두드러지며, 정보를 비판적으로 읽고 책임 있게 표현하는 힘이 성장함.`,
+      `${josa(cs,'eul')} 중심으로 꾸준한 성장을 보임.`
+    ];
+    S.push(warm?closers[0]:pick(closers));
+  }
+  if(d.memo){S.push(asSent(d.memo));}
+  return S;
+}
+
+function assemble(order){
+  return order.map(s=>s).join(' ');
+}
+
+function generate(){
+  const d=collect();
+  const style=$('style').value;
+  const filled = [d.books,d.note,d.verify,d.ethic,d.wtitle,d.wbody,d.proj].some(x=>x);
+  if(!filled){ setMsg('copyMsg','독서·글쓰기·수업활동 중 최소 한 가지는 입력해 주세요.','err'); return; }
+  const base = sentences(d,style);
+  // 3가지 초안: 순서/문미 변주
+  const drafts=[];
+  for(let i=0;i<3;i++){
+    let arr = i===0 ? base : sentences(d,style); // 재추출로 표현 변주
+    drafts.push(clean(assemble(arr)));
+  }
+  window._drafts=drafts;
+  const limit=parseInt($('limitChar').value)||500;
+  const html=drafts.map((t,i)=>{
+    const ch=[...t].length, by=byteLen(t);
+    const over = ch>limit;
+    return `<div class="outblock">
+      <div class="outhead"><span class="name">초안 ${i+1}</span>
+      <span class="counter">글자 <b class="${over?'over':''}">${ch}</b>/${limit} · <b>${by}</b>byte</span></div>
+      <div class="out">${t}</div></div>`;
+  }).join('');
+  $('draftOut').outerHTML=`<div id="draftOut">${html}</div>`;
+  $('draftTools').style.display='flex';
+  buildPrompt(d,limit);
+}
+
+/* ---------- AI 프롬프트 ---------- */
+function buildPrompt(d,limit){
+  const L=[];
+  L.push('너는 중학교 생활기록부 과목별 세부능력 및 특기사항(과세특)을 쓰는 교사다.');
+  L.push('아래 한 학생의 [AI 문해력 주제선택] 활동 기록만을 근거로, 지어내지 말고, 관찰된 사실 중심으로 과세특을 작성하라.');
+  L.push('조건: (1) 역량 강조체 — 정보판별력·문해력·표현력·디지털윤리·자기주도성 등 역량이 드러나게. (2) 문장 끝은 ~함. 형태의 담백한 관찰체. (3) 1인칭·따옴표·영어 표기 지양. (4) 학생은 같은 주어 반복 없이. (5) 분량 '+limit+'자 내외.');
+  L.push('출력: 완성된 과세특 1개 문단만.');
+  L.push('');
+  L.push('[학생 활동 기록]');
+  const add=(k,v)=>{if(v)L.push(`- ${k}: ${v}`);};
+  add('완독 도서',d.books); add('독서레벨',d.level);
+  add('독서노트(학생 서술)',d.note); add('도서평점·이유',d.rate); add('어휘·독서태도',d.voca);
+  add('글쓰기 주제',d.wtitle); add('글의 주장·내용',d.wbody);
+  add('받은 피드백',d.fb); add('피드백 반영·퇴고',d.fb2);
+  add('정보 판별·검증',d.verify); add('AI 윤리·태도',d.ethic);
+  add('프로젝트·산출물',d.proj); add('토론·협업·성찰',d.disc);
+  add('강조 역량',d.comps.join(', ')); add('교사 메모',d.memo);
+  $('promptOut').textContent = L.join('\n');
+}
+
+/* ---------- 복사 ---------- */
+function copyText(t,okmsg){
+  navigator.clipboard.writeText(t).then(()=>setMsg('copyMsg',okmsg,'ok'))
+  .catch(()=>{ // fallback
+    const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);
+    ta.select();try{document.execCommand('copy');setMsg('copyMsg',okmsg,'ok');}catch(e){setMsg('copyMsg','복사 실패 — 직접 선택해 복사하세요.','err');}
+    document.body.removeChild(ta);});
+}
+function setMsg(id,txt,cls){const m=$(id);m.textContent=txt;m.className='msg show '+cls;setTimeout(()=>m.className='msg',2600);}
+
+/* ---------- 이벤트 ---------- */
+$('genBtn').onclick=generate;
+document.addEventListener('click',e=>{
+  if(e.target.id==='regen'){generate();}
+  if(e.target.dataset && e.target.dataset.copy!==undefined){
+    const i=+e.target.dataset.copy; if(window._drafts&&window._drafts[i])copyText(window._drafts[i],`초안 ${i+1} 복사됨`);
+  }
+});
+$('copyPrompt').onclick=()=>copyText($('promptOut').textContent,'프롬프트 복사됨');
+$('clearBtn').onclick=()=>{document.querySelectorAll('.card input, .card textarea').forEach(el=>el.value='');
+  document.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));};
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+  $('paneDraft').style.display=t.dataset.t==='draft'?'block':'none';
+  $('panePrompt').style.display=t.dataset.t==='prompt'?'block':'none';});
+
+/* ---------- 구글 시트 연동 (gviz, API키 불필요) ---------- */
+const HEADER_MAP={
+  '반':'cls','학급':'cls','번호':'no','이름':'name','성명':'name',
+  '독서레벨':'level','레벨':'level','완독권수':'booksN','완독도서':'books','도서':'books',
+  '독서노트':'note','노트':'note','도서평점':'rate','평점':'rate','어휘태도':'voca','어휘':'voca','독서태도':'voca',
+  '글제목':'wtitle','글내용':'wbody','피드백':'fb','피드백반영':'fb2',
+  '정보판별':'verify','윤리태도':'ethic','프로젝트':'proj','토론성찰':'disc','토론':'disc','성찰':'disc',
+  '강조역량':'comps','역량':'comps','교사메모':'memo','메모':'memo','특기사항':'memo'
+};
+let SHEET_ROWS=[];
+let _jsonpSeq=0;
+function extractId(s){ // SHEET_ID 또는 전체 URL 모두 허용
+  const m=s.match(/\/d\/([a-zA-Z0-9-_]+)/); return m?m[1]:s.trim();
+}
+function loadSheet(){
+  const id=extractId(val('sheetId')), name=val('sheetName');
+  if(!id){setMsg('sheetMsg','SHEET_ID를 입력하세요.','err');return;}
+  setMsg('sheetMsg','불러오는 중...','ok');
+  const cb='__gviz_cb_'+(++_jsonpSeq);
+  const isGid=/^\d+$/.test(name);
+  let url='https://docs.google.com/spreadsheets/d/'+encodeURIComponent(id)
+    +'/gviz/tq?tqx=out:json;responseHandler:'+cb
+    +(name?(isGid?'&gid='+encodeURIComponent(name):'&sheet='+encodeURIComponent(name)):'');
+  const script=document.createElement('script');
+  let done=false;
+  const cleanup=()=>{try{delete window[cb];}catch(e){window[cb]=undefined;} if(script.parentNode)script.parentNode.removeChild(script);};
+  const timer=setTimeout(()=>{if(done)return;done=true;cleanup();
+    setMsg('sheetMsg','응답이 없습니다 — 공유가 [링크 있는 모든 사용자: 뷰어]인지, SHEET_ID·시트이름이 맞는지 확인하세요.','err');},12000);
+  window[cb]=function(resp){
+    if(done)return;done=true;clearTimeout(timer);
+    try{parseGviz(resp);}catch(e){setMsg('sheetMsg','데이터 해석 실패 — 시트 이름/탭을 확인하세요.','err');}
+    cleanup();
+  };
+  script.onerror=()=>{if(done)return;done=true;clearTimeout(timer);cleanup();
+    setMsg('sheetMsg','불러오기 실패 — 공유 설정([링크 있는 모든 사용자: 뷰어]) 또는 SHEET_ID를 확인하세요.','err');};
+  script.src=url;
+  document.body.appendChild(script);
+};
+function parseGviz(j){
+  if(!j||!j.table){setMsg('sheetMsg','시트 데이터를 찾지 못했습니다. 탭 이름을 확인하세요.','err');return;}
+  let cols=(j.table.cols||[]).map(c=>(c.label||'').trim());
+  let keys=cols.map(c=>HEADER_MAP[c.replace(/\s/g,'')]||null);
+  let dataRows=j.table.rows||[];
+  if(!keys.includes('name') && dataRows.length){ // 라벨에 이름열이 없으면 첫 행을 머리글로
+    const hdr=(dataRows[0].c||[]).map(c=>c&&c.v!=null?String(c.v).replace(/\s/g,''):'');
+    const keys2=hdr.map(h=>HEADER_MAP[h]||null);
+    if(keys2.includes('name')){keys=keys2;dataRows=dataRows.slice(1);}
+  }
+  SHEET_ROWS=dataRows.map(r=>{const o={};(r.c||[]).forEach((cell,i)=>{if(keys[i])o[keys[i]]=cell&&cell.v!=null?String(cell.v):'';});return o;}).filter(o=>o.name);
+  if(!SHEET_ROWS.length){setMsg('sheetMsg','학생 행을 찾지 못했습니다. 열 이름(이름 등)과 데이터 행을 확인하세요.','err');return;}
+  renderStudents();
+  try{localStorage.setItem('gws_sid',val('sheetId'));localStorage.setItem('gws_snm',val('sheetName'));}catch(e){}
+  setMsg('sheetMsg',SHEET_ROWS.length+'명 불러옴. 아래에서 학생을 선택하세요.','ok');
+}
+function renderStudents(){
+  $('stWrap').style.display='block';
+  $('stBody').innerHTML=SHEET_ROWS.map((o,i)=>
+    `<tr data-i="${i}"><td>${o.cls||''}</td><td>${o.no||''}</td><td>${o.name||''}</td>
+     <td>${o.books?'●':'·'}</td><td>${o.wtitle||o.wbody?'●':'·'}</td></tr>`).join('');
+  $('stBody').querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{
+    $('stBody').querySelectorAll('tr').forEach(x=>x.classList.remove('sel'));tr.classList.add('sel');
+    fillFrom(SHEET_ROWS[+tr.dataset.i]);
+  });
+}
+function fillFrom(o){
+  const set=(id,v)=>{if($(id))$(id).value=v||'';};
+  set('f_class',o.cls);set('f_no',o.no);set('f_name',o.name);set('f_level',o.level);
+  set('f_books_n',o.booksN);set('f_books',o.books);set('f_note',o.note);set('f_rate',o.rate);set('f_voca',o.voca);
+  set('f_wtitle',o.wtitle);set('f_wbody',o.wbody);set('f_fb',o.fb);set('f_fb2',o.fb2);
+  set('f_verify',o.verify);set('f_ethic',o.ethic);set('f_proj',o.proj);set('f_disc',o.disc);set('f_memo',o.memo);
+  document.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));
+  if(o.comps){const want=o.comps.split(/[,·]/).map(s=>s.trim());
+    document.querySelectorAll('.chip').forEach(c=>{if(want.some(w=>c.textContent.includes(w)||w.includes(c.textContent.slice(0,3))))c.classList.add('on');});}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- 초기화: 기본 시트 자동 채움 · 자동 불러오기 ---------- */
+$('loadBtn').onclick=loadSheet;
+(function init(){
+  let sid=CFG_SHEET_ID, snm=CFG_SHEET_NAME;
+  try{const s=localStorage.getItem('gws_sid'),n=localStorage.getItem('gws_snm');if(s)sid=s;if(n)snm=n;}catch(e){}
+  if(sid && !$('sheetId').value) $('sheetId').value=sid;
+  if(snm && !$('sheetName').value) $('sheetName').value=snm;
+  if(CFG_AUTOLOAD && $('sheetId').value) loadSheet();
+})();
+</script>
+</body>
+</html>

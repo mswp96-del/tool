@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 문해력 과세특 · 실시간 운영현황</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --ink:#12203a; --sub:#5b6b82; --line:#e5e9f1; --bg:#eef2f8; --card:#fff;
+    --brand:#2563eb; --brand-d:#1d4ed8; --teal:#0d9488; --amber:#d97706;
+    --ok:#15803d; --okbg:#ecfdf3; --warn:#b91c1c; --warnbg:#fef2f2; --soft:#eef2ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Pretendard','Malgun Gothic',system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 70px}
+  header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .eyebrow{font-size:12.5px;letter-spacing:2px;color:var(--teal);font-weight:800}
+  h1{font-size:24px;margin:4px 0 3px;letter-spacing:-.5px}
+  h1 .ver{font-size:12px;font-weight:800;color:#fff;background:var(--brand);padding:3px 10px;border-radius:20px;vertical-align:middle}
+  .sub{color:var(--sub);font-size:13.5px;max-width:720px;line-height:1.55}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  button{font-family:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:10px;cursor:pointer;font-weight:700;transition:.15s}
+  button:hover{border-color:#c3cbdb}
+  button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  button.primary:hover{background:var(--brand-d)}
+  .updated{font-size:12.5px;color:var(--sub);margin-top:8px}
+  .spin{display:inline-block;width:12px;height:12px;border:2px solid #cbd5e1;border-top-color:var(--brand);border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:15px 17px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .kpi .l{font-size:12.5px;color:var(--sub);font-weight:700}
+  .kpi .n{font-size:27px;font-weight:800;letter-spacing:-1px;margin-top:5px}
+  .kpi.k1 .n{color:var(--brand)} .kpi.k2 .n{color:var(--teal)} .kpi.k3 .n{color:var(--amber)} .kpi.k4 .n{color:var(--ok)}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  thead th{background:#f1f5fb;text-align:left;font-size:12.5px;color:#334155;padding:11px 12px;border-bottom:1px solid var(--line);position:sticky;top:0}
+  td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13.5px;line-height:1.6}
+  tr:last-child td{border-bottom:none}
+  .who{font-weight:800;font-size:14px}
+  .who small{display:block;color:var(--sub);font-weight:600;font-size:11.5px;margin-top:2px}
+  .cnt{white-space:nowrap;font-size:12px;font-weight:800}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:800}
+  .badge.ok{background:var(--okbg);color:var(--ok)} .badge.warn{background:var(--warnbg);color:var(--warn)}
+  .gws{white-space:pre-wrap}
+  .full{margin-top:8px;font-size:12.5px;color:var(--sub)}
+  .full summary{cursor:pointer;font-weight:700;color:var(--brand)}
+  .full .ft{margin-top:6px;color:#475569;line-height:1.6;white-space:pre-wrap}
+  .rowbtn{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+  .rowbtn button{padding:6px 10px;font-size:12px}
+  .msg{font-size:13px;padding:11px 13px;border-radius:10px;margin:12px 0;display:none;font-weight:600}
+  .msg.show{display:block}.msg.err{background:var(--warnbg);color:var(--warn);border:1px solid #fecaca}
+  .msg.ok{background:var(--okbg);color:var(--ok);border:1px solid #bbf7d0}
+  .setup{background:#fffdf5;border:1px solid #f0e3bd;border-radius:12px;padding:13px 15px;font-size:12.5px;line-height:1.6;margin-top:10px;color:#7c5410}
+  .setup code{background:#f3f0e4;padding:1px 6px;border-radius:5px}
+  .foot{margin-top:20px;text-align:center;color:#94a3b8;font-size:12px}
+  @media print{
+    body{background:#fff}.controls,.rowbtn,.foot,.setup{display:none!important}
+    .full[open] .ft{display:block} details{open:true}
+    table{box-shadow:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">AI 선도학교 운영사례 · 독서화랑 × 자작자작</div>
+      <h1>AI 문해력 과세특 · 실시간 운영현황 <span class="ver">v1.0</span></h1>
+      <div class="sub">구글 시트 <b>과세특자료</b>를 열 때마다 실시간으로 읽어, 학생별 과세특 초안을 <b>번호순</b>으로 정리합니다. 나이스 세특 한도(500자·1500바이트) 안으로 맞춘 문안과 글자수·바이트를 함께 보여줍니다. <b>시트만 채우면 자동 반영</b>됩니다.</div>
+      <div class="updated" id="updated">아직 불러오지 않음</div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="refresh">↻ 새로고침</button>
+      <button id="csv">⬇ CSV 내려받기</button>
+      <button id="print">🖨 인쇄</button>
+    </div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi k1"><div class="l">학생 수</div><div class="n" id="kStu">–</div></div>
+    <div class="kpi k2"><div class="l">평균 글자수(나이스용)</div><div class="n" id="kAvg">–</div></div>
+    <div class="kpi k3"><div class="l">전체 초안 한도초과</div><div class="n" id="kOver">–</div></div>
+    <div class="kpi k4"><div class="l">완성(나이스용 적정)</div><div class="n" id="kOk">–</div></div>
+  </div>
+
+  <div class="msg" id="msg"></div>
+
+  <table id="tbl">
+    <thead><tr>
+      <th style="width:64px">반·번호</th><th style="width:90px">이름</th>
+      <th>나이스용 과세특 (한도 내 · 바로 입력)</th><th style="width:96px">글자/바이트</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="setup" id="setup" style="display:none"></div>
+  <div class="foot">과세특 초안은 참고용이며 반드시 교사가 사실 확인·수정 후 기재하세요 · 개인정보가 담긴 자료이므로 화면 공유 시 유의하세요.</div>
+</div>
+
+<script>
+/* ===== 교사 설정 ===== */
+const CFG_SHEET_ID   = "118xWGR95ofWlyU1cmntZ7Ab-cgMoqoi3zXtB1XEB5z8";
+const CFG_SHEET_NAME = "과세특자료";
+const MAX_CHAR = 500, MAX_BYTE = 1500;
+
+const HEADER_MAP={
+  '반':'cls','학급':'cls','번호':'no','이름':'name','성명':'name',
+  '독서레벨':'level','완독권수':'booksN','완독도서':'books','도서':'books',
+  '독서노트':'note','도서평점':'rate','평점':'rate','어휘태도':'voca','어휘':'voca','독서태도':'voca',
+  '글제목':'wtitle','글내용':'wbody','피드백':'fb','피드백반영':'fb2',
+  '정보판별':'verify','윤리태도':'ethic','프로젝트':'proj','토론성찰':'disc','토론':'disc','성찰':'disc',
+  '강조역량':'comps','역량':'comps','교사메모':'memo','메모':'memo','특기사항':'memo'
+};
+
+const $=s=>document.querySelector(s);
+function clean(s){return (s||"").replace(/\s+/g,' ').replace(/["“”'']/g,'').trim();}
+function norm(s){return clean(s).replace(/[.\s·,]+$/,'');}
+function asSent(s){const t=norm(s);return t?(/[.!?]$/.test(t)?t:t+'.'):'';}
+function firstBook(s){if(!s)return '';const t=s.split(/[,·、\n]/)[0].trim();return t.replace(/\(.*?\)/,'').trim();}
+function josa(w,k){if(!w)return '';const c=w.charCodeAt(w.length-1);let j=false;if(c>=0xAC00&&c<=0xD7A3)j=((c-0xAC00)%28)!==0;
+  if(k==='eul')return w+(j?'을':'를');if(k==='eun')return w+(j?'은':'는');return w;}
+function byteLen(s){let b=0;for(const ch of s)b+=ch.charCodeAt(0)>127?3:1;return b;}
+
+function sentences(d){
+  const S=[]; const book=firstBook(d.books);
+  if(d.books||d.note){
+    const lead=book?`${josa(book,'eul')} 비롯한 주제 도서를 완독하며`:`주제 도서를 꾸준히 완독하며`;
+    if(d.note){ S.push(`${lead} 자신의 생각을 독서노트에 근거를 들어 기록함.`); S.push(asSent(d.note));
+      S.push(`책의 내용을 자신의 삶과 연결해 해석하는 문해력이 성장함.`);
+    } else S.push(`${lead} 핵심 내용을 자기 언어로 정리하는 독서 태도가 성실함.`);
+  }
+  if(d.voca) S.push(`${norm(d.voca)} 등 어휘와 표현을 넓혀가며 읽기의 폭을 확장함.`);
+  if(d.rate) S.push(`${norm(d.rate)} 등 자신의 독서 경험을 근거로 책을 평가하는 안목을 보임.`);
+  if(d.verify) S.push(`AI가 생성한 정보를 무비판적으로 수용하지 않고 ${norm(d.verify)}, 출처를 확인하고 교차검증하는 정보 판별력이 뛰어남.`);
+  if(d.ethic) S.push(`${josa(norm(d.ethic),'eul')} 통해 AI의 편향과 저작권·개인정보 문제를 책임 있게 인식하는 디지털 윤리의식을 기름.`);
+  if(d.wtitle||d.wbody){ const t=d.wtitle?`${josa(norm(d.wtitle),'eul')} 주제로 글을 쓰며 `:`자신의 생각을 글로 풀어내며 `;
+    S.push(`${t}논리적 표현력과 서사적 사고를 발휘함.`); if(d.wbody) S.push(asSent(d.wbody)); }
+  if(d.fb||d.fb2){ const a=d.fb?`${norm(d.fb)} 등의 피드백을 반영하여 `:`동료·교사의 피드백을 적극 수용하여 `;
+    const b=d.fb2?`${norm(d.fb2)}, `:``; S.push(`${a}${b}글을 스스로 다듬어 완성도를 높이는 성찰과 자기주도성이 인상적임.`); }
+  if(d.proj) S.push(`${norm(d.proj)} 활동에서 AI를 도구로 활용해 목적에 맞는 결과물을 창의적으로 완성함.`);
+  if(d.disc) S.push(`${norm(d.disc)} 등 협업 과정에서 의견을 나누고 배움을 연결하는 태도를 보임.`);
+  if(d.comps){ const cs=String(d.comps).split(/[,·]/).map(x=>x.trim()).filter(Boolean).slice(0,3).join('·');
+    if(cs) S.push(`이러한 활동을 통해 ${cs} 등의 역량에서 고른 성장을 보이며 AI 시대에 요구되는 문해력의 토대를 다짐.`); }
+  if(d.memo) S.push(asSent(d.memo));
+  return S.map(clean).filter(Boolean);
+}
+function trimLimit(sents){ let out=[]; for(const s of sents){ const c=clean([...out,s].join(' '));
+  if([...c].length<=MAX_CHAR && byteLen(c)<=MAX_BYTE) out.push(s); else break; } return clean(out.join(' ')); }
+
+/* ===== gviz JSONP 로더 ===== */
+let ROWS=[];
+function load(){
+  $("#updated").innerHTML='<span class="spin"></span>불러오는 중…';
+  const cb='__gv_'+Math.floor(Math.random()*1e9);
+  const url=`https://docs.google.com/spreadsheets/d/${CFG_SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${cb}&sheet=${encodeURIComponent(CFG_SHEET_NAME)}`;
+  let done=false; const sc=document.createElement('script');
+  const clean_=()=>{try{delete window[cb];}catch(e){window[cb]=undefined;} if(sc.parentNode)sc.parentNode.removeChild(sc);};
+  const tm=setTimeout(()=>{if(done)return;done=true;clean_();fail("응답 없음 — 시트 공유(링크 있는 모든 사용자·뷰어)·시트이름을 확인하세요.");},12000);
+  window[cb]=function(j){ if(done)return;done=true;clearTimeout(tm);
+    try{ parse(j); }catch(e){ fail("데이터 해석 실패 — 시트 형식을 확인하세요."); console.error(e);} clean_(); };
+  sc.onerror=()=>{if(done)return;done=true;clearTimeout(tm);clean_();fail("불러오기 실패 — 시트 공유·ID를 확인하세요.");};
+  sc.src=url; document.body.appendChild(sc);
+}
+function fail(m){ $("#updated").textContent="불러오기 실패"; const el=$("#msg"); el.className="msg show err"; el.textContent=m;
+  $("#setup").style.display="block"; $("#setup").innerHTML=`⚙️ 확인: 시트 <code>${CFG_SHEET_NAME}</code> 공유가 <b>‘링크가 있는 모든 사용자 · 뷰어’</b>인지, 상단 <code>CFG_SHEET_ID</code>가 맞는지 확인하세요.`; }
+function parse(j){
+  const cols=(j.table.cols||[]).map(c=>(c.label||'').trim());
+  let keys=cols.map(c=>HEADER_MAP[c.replace(/\s/g,'')]||null);
+  let rows=j.table.rows||[];
+  if(!keys.includes('name') && rows.length){ const hdr=(rows[0].c||[]).map(c=>c&&c.v!=null?String(c.v).replace(/\s/g,''):'');
+    const k2=hdr.map(h=>HEADER_MAP[h]||null); if(k2.includes('name')){keys=k2;rows=rows.slice(1);} }
+  ROWS=rows.map(r=>{const o={};(r.c||[]).forEach((cell,i)=>{if(keys[i])o[keys[i]]=cell&&cell.v!=null?String(cell.v):'';});return o;})
+    .filter(o=>o.name && o.name.trim());
+  $("#msg").className="msg"; $("#setup").style.display="none";
+  $("#updated").textContent="마지막 갱신 "+new Date().toLocaleTimeString("ko-KR");
+  render();
+}
+
+let TABLE=[];
+function numOf(x){const m=String(x||'').match(/\d+/);return m?parseInt(m[0],10):0;}
+function render(){
+  TABLE=ROWS.map(o=>{ const sents=sentences(o); const full=clean(sents.join(' ')); const neis=trimLimit(sents);
+    return {cls:o.cls||'',no:o.no||'',name:o.name||'',full,neis,ch:[...neis].length,by:byteLen(neis),
+      fch:[...full].length,fby:byteLen(full)}; })
+    .sort((a,b)=>numOf(a.cls)-numOf(b.cls)||numOf(a.no)-numOf(b.no));
+  const tb=$("#tbody"); tb.innerHTML=TABLE.map((t,i)=>{
+    const ok=t.ch<=MAX_CHAR&&t.by<=MAX_BYTE;
+    return `<tr>
+      <td class="cnt">${esc(t.cls)}반 ${esc(t.no)}번</td>
+      <td class="who">${esc(t.name)}</td>
+      <td>
+        <div class="gws" id="g${i}">${esc(t.neis)}</div>
+        <div class="rowbtn"><button onclick="cp(${i})">📋 복사</button></div>
+        <details class="full"><summary>전체 초안 보기 (${t.fch}자·${t.fby}byte)</summary><div class="ft">${esc(t.full)}</div></details>
+      </td>
+      <td class="cnt"><span class="badge ${ok?'ok':'warn'}">${t.ch}자<br>${t.by}byte</span></td>
+    </tr>`; }).join("") || `<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:30px">표시할 학생이 없습니다. 시트를 채워주세요.</td></tr>`;
+  // KPI
+  const n=TABLE.length; $("#kStu").textContent=n;
+  $("#kAvg").textContent = n? Math.round(TABLE.reduce((s,t)=>s+t.ch,0)/n)+"자" : "–";
+  $("#kOver").textContent = TABLE.filter(t=>t.fch>MAX_CHAR||t.fby>MAX_BYTE).length;
+  $("#kOk").textContent = TABLE.filter(t=>t.ch<=MAX_CHAR&&t.by<=MAX_BYTE).length;
+}
+function esc(s){return (s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function cp(i){ const t=TABLE[i]; navigator.clipboard.writeText(t.neis).then(()=>toast(`${t.name} 나이스용 과세특 복사됨`)); }
+function toast(m){ const el=$("#msg"); el.className="msg show ok"; el.textContent=m; setTimeout(()=>el.className="msg",2200); }
+
+function downloadCSV(){
+  const rows=[["반","번호","이름","나이스용과세특","글자수","바이트","전체초안"],
+    ...TABLE.map(t=>[t.cls,t.no,t.name,t.neis,t.ch,t.by,t.full])];
+  const csv="﻿"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="AI문해력_과세특_"+new Date().toISOString().slice(0,10)+".csv"; a.click();
+}
+window.cp=cp;
+function init(){
+  $("#refresh").onclick=load;
+  $("#print").onclick=()=>window.print();
+  $("#csv").onclick=downloadCSV;
+  load();
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+</script>
+</body>
+</html>

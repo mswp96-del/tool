@@ -1,0 +1,284 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Ai Munhaeryeok Teacher Dashboard",
+  "schemaVersion": 1,
+  "description": "AI 문해력 실험실 교사용 대시보드(웹앱) — 실험실 제출 구글 시트를 실시간으로 읽어 학생별 도장 진행(n/10)·역량 커버리지(원리·검증·책임·활용)·차시별 제출 현황을 표시. 학생 선택 시 차시별 누가기록을 보여주고, 학생별/전체 누가기록을 과세특 작성용 PDF(학생별 페이지·메모칸)로 저장. 사용 전 상단 SHEET_ID·SHEET_NAME 설정 필요.",
+  "mcpTools": [],
+  "mcpServerNames": []
+}
+</script>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 문해력 실험실 · 교사용 대시보드</title>
+<style>
+  :root{
+    --bg:#f4f5f9; --card:#fff; --ink:#20242e; --muted:#6b7180; --line:#e6e8f0;
+    --brand:#8a3324; --brand-soft:#f2e5e0;
+    --wonli:#2f9e69; --geomjeung:#c2255c; --chaegim:#7048e8; --hwalyong:#c9711d;
+    --ok:#2f9e69; --shadow:0 1px 3px rgba(20,30,60,.06),0 8px 26px rgba(20,30,60,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Pretendard","Apple SD Gothic Neo","Segoe UI",system-ui,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 20px 60px}
+  header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  h1{font-size:21px;margin:0;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:13px;margin-top:5px;max-width:640px;line-height:1.5}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  button{font-family:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:10px;cursor:pointer;font-weight:600;transition:.15s}
+  button:hover{border-color:#cdd2e0}
+  button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  button.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+  .updated{font-size:12.5px;color:var(--muted);margin-top:6px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+  .kpi .label{font-size:12.5px;color:var(--muted);font-weight:600}
+  .kpi .num{font-size:28px;font-weight:800;letter-spacing:-1px;margin-top:6px}
+  .kpi.k1 .num{color:var(--brand)} .kpi.k2 .num{color:var(--chaegim)} .kpi.k3 .num{color:var(--hwalyong)} .kpi.k4 .num{color:var(--ok)}
+  .cols{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+  .panel h2{font-size:14.5px;margin:0;padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .panel h2 .count{font-size:12px;color:var(--muted);font-weight:600}
+  .search{padding:10px 14px;border-bottom:1px solid var(--line)}
+  .search input{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;font-family:inherit}
+  .stulist{max-height:560px;overflow-y:auto}
+  .stu{padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+  .stu:hover{background:#f7f8fc}.stu.active{background:var(--brand-soft)}
+  .stu .r1{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .stu .nm{font-weight:700;font-size:14px}
+  .stu .nm small{color:var(--muted);font-weight:600;font-size:11.5px;margin-left:6px}
+  .stu .dc{font-size:11.5px;color:var(--muted);font-weight:700}
+  .pbar{height:7px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:8px}
+  .pbar > i{display:block;height:100%;background:var(--brand);border-radius:6px}
+  .caps{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+  .cap{font-size:10.5px;font-weight:800;color:#fff;padding:2px 8px;border-radius:20px;opacity:.35}
+  .cap.on{opacity:1}
+  .detailhead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .detailhead .who{font-size:16px;font-weight:800}
+  .detailhead .who small{font-size:12px;color:var(--muted);font-weight:600;margin-left:6px}
+  .records{padding:6px 16px 18px;max-height:520px;overflow-y:auto}
+  .rec{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:11px}
+  .rec .rt{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+  .rec .act{font-weight:700;font-size:13px}
+  .rec .cap2{font-size:10.5px;font-weight:800;color:#fff;padding:2px 8px;border-radius:20px}
+  .rec .dn{font-size:11px;font-weight:800}
+  .rec .body{font-size:13px;line-height:1.6;white-space:pre-wrap;color:#333}
+  .chart{padding:14px 16px}
+  .barrow{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12.5px}
+  .barrow .lb{width:110px;color:var(--muted);flex-shrink:0}
+  .barrow .bar{flex:1;height:16px;background:var(--line);border-radius:6px;overflow:hidden}
+  .barrow .bar > i{display:block;height:100%;background:var(--brand);border-radius:6px}
+  .barrow .v{width:34px;text-align:right;font-weight:700}
+  .placeholder{padding:50px 20px;text-align:center;color:var(--muted)}
+  .placeholder b{display:block;color:var(--ink);font-size:15px;margin-bottom:6px}
+  .setup{background:#fffdf5;border:1px solid #f0e3bd;border-radius:14px;padding:15px 18px;margin-top:6px;font-size:13.5px;line-height:1.65}
+  .setup code{background:#f3f0e4;padding:1px 6px;border-radius:5px;font-size:12.5px}
+  .spin{display:inline-block;width:13px;height:13px;border:2px solid var(--brand-soft);border-top-color:var(--brand);border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .foot{margin-top:22px;text-align:center;color:var(--muted);font-size:12px}
+
+  #printArea{display:none}
+  .p-student{page-break-after:always}.p-student:last-child{page-break-after:auto}
+  .p-head{border-bottom:2px solid #222;padding-bottom:8px;margin-bottom:12px}
+  .p-head h2{margin:0;font-size:18px}.p-head .sub{font-size:12px;color:#555;margin-top:4px}
+  .p-rec{border:1px solid #ccc;border-radius:8px;padding:10px 12px;margin-bottom:10px}
+  .p-rec .rt{font-size:12px;color:#333;margin-bottom:5px;font-weight:700}
+  .p-rec .rb{font-size:13px;line-height:1.6;white-space:pre-wrap}
+  .p-memo{border:1px dashed #999;border-radius:8px;min-height:64px;margin-top:10px;padding:8px 12px}
+  .p-memo b{font-size:12px;color:#555}
+  @media print{body{background:#fff}.screen{display:none!important}#printArea{display:block}@page{margin:14mm}}
+</style>
+</head>
+<body>
+<div class="wrap screen">
+  <header class="top">
+    <div>
+      <h1>🧪 AI 문해력 실험실 · 교사용 대시보드</h1>
+      <div class="sub">학생들이 실험실에서 제출한 차시 기록을 실시간으로 모아, 도장 진행·역량 커버리지·차시별 현황을 보여줍니다. 과세특 작성 전 학생별·전체 누가기록을 PDF로 저장하세요.</div>
+      <div class="updated" id="updated">아직 불러오지 않음</div>
+    </div>
+    <div class="controls">
+      <button id="refresh" class="primary">↻ 새로고침</button>
+      <button id="pdfCur" class="ok" style="display:none">🖨 이 학생 PDF</button>
+      <button id="pdfAll">📚 전체 누가기록 PDF</button>
+    </div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi k1"><div class="label">참여 학생 수</div><div class="num" id="kStu">–</div></div>
+    <div class="kpi k2"><div class="label">제출 기록(차시)</div><div class="num" id="kRec">–</div></div>
+    <div class="kpi k3"><div class="label">평균 도장</div><div class="num" id="kAvg">–</div></div>
+    <div class="kpi k4"><div class="label">완주(15/15)</div><div class="num" id="kFull">–</div></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="panel">
+        <h2>👥 학생별 현황 <span class="count" id="stuCount"></span></h2>
+        <div class="search"><input id="q" placeholder="이름·반 검색…"></div>
+        <div class="stulist" id="stulist"></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="detailhead"><div class="who" id="who">학생을 선택하세요</div></div>
+        <div class="records" id="records"><div class="placeholder"><b>왼쪽에서 학생을 선택하세요</b>선택한 학생의 차시별 누가기록이 표시됩니다.</div></div>
+      </div>
+      <div class="panel">
+        <h2>📊 차시별 제출 현황</h2>
+        <div class="chart" id="lessonChart"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="setup" id="setupBox">
+    <b>⚙️ 처음 한 번만 — 구글 시트 연결.</b> 이 파일 소스 상단의 <code>SHEET_ID</code>·<code>SHEET_NAME</code>을 실험실 응답 시트 값으로 바꾸세요.
+    실험실이 보내는 열(제출시각·이름·반·프로그램·도장수·활동·응답·완료)을 그대로 인식합니다. 시트 공유는 “링크가 있는 모든 사용자 · 뷰어”여야 합니다.
+  </div>
+  <div class="foot">AI 문해력 실험실 교사용 대시보드 · 데이터 출처: 구글 시트(실시간) · 강서중학교 과학교사</div>
+</div>
+<div id="printArea"></div>
+
+<script>
+/* ============ 설정 (여기만 바꾸세요) ============ */
+const SHEET_ID   = "1iu0JAGIWOgI4tZZ_zIHAcGlYFdZrH6fqa9-pUUzrl6o";
+const SHEET_GID  = "";
+const SHEET_NAME = "실험실기록";
+/* =============================================== */
+const CAPS = {원리:"var(--wonli)", 검증:"var(--geomjeung)", 책임:"var(--chaegim)", 활용:"var(--hwalyong)"};
+const TOTAL_LESSONS = 15;
+
+let HEADERS=[], ROWS=[], BYSTU={}, ORDER=[], CUR=null, COL={};
+const $=s=>document.querySelector(s);
+const norm=s=>(s||"").toString().toLowerCase().replace(/\s/g,"");
+const findCol=keys=>HEADERS.find(h=>keys.some(k=>norm(h).includes(norm(k))));
+const idx=h=>HEADERS.indexOf(h);
+function esc(s){return (s==null?"":s.toString()).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function lessonNo(act){ const m=(act||"").match(/(\d{1,2})\s*차시/); return m?parseInt(m[1],10):null; }
+function capOf(act){ const m=(act||"").match(/\[(원리|검증|책임|활용)\]/); return m?m[1]:null; }
+
+function load(){
+  if(SHEET_ID.includes("여기에")){ build(); return; }
+  $("#updated").innerHTML='<span class="spin"></span>불러오는 중…';
+  const cb='__gviz_cb_'+Math.floor(Math.random()*1e9);
+  const q=(typeof SHEET_GID!=="undefined"&&SHEET_GID)
+    ? `gid=${encodeURIComponent(SHEET_GID)}`
+    : `sheet=${encodeURIComponent(SHEET_NAME)}`;
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${cb}&${q}`;
+  let done=false;
+  const script=document.createElement('script');
+  const cleanup=()=>{ try{delete window[cb];}catch(e){window[cb]=undefined;} if(script.parentNode)script.parentNode.removeChild(script); };
+  const timer=setTimeout(()=>{ if(done)return; done=true; cleanup();
+    $("#updated").textContent="불러오기 실패 — 시트 공유(링크 있는 모든 사용자·뷰어)·탭 이름을 확인하세요."; build(true); },12000);
+  window[cb]=function(json){
+    if(done)return; done=true; clearTimeout(timer);
+    try{
+      HEADERS=json.table.cols.map((c,i)=>c.label||("열"+(i+1)));
+      ROWS=json.table.rows.map(r=>r.c.map(c=>c?(c.f??c.v??""):"")).filter(r=>r.some(v=>v!==""&&v!=null));
+      $("#updated").textContent="마지막 갱신 "+new Date().toLocaleTimeString("ko-KR");
+      build();
+    }catch(e){ $("#updated").textContent="데이터 해석 실패 — 탭 이름/데이터를 확인하세요."; console.error(e); build(true); }
+    cleanup();
+  };
+  script.onerror=()=>{ if(done)return; done=true; clearTimeout(timer); cleanup();
+    $("#updated").textContent="불러오기 실패 — 시트 공유·ID를 확인하세요."; build(true); };
+  script.src=url;
+  document.body.appendChild(script);
+}
+
+function build(err){
+  COL={name:findCol(["이름","성명","학생"]), cls:findCol(["반","학급"]), time:findCol(["제출시각","시간","날짜","타임","timestamp"]),
+       act:findCol(["활동","차시"]), body:findCol(["응답","내용","답변"]), done:findCol(["완료","상태"]), stamp:findCol(["도장"])};
+  BYSTU={};
+  ROWS.forEach(r=>{ const n=(COL.name?r[idx(COL.name)]:"")||"(이름미상)"; (BYSTU[n]=BYSTU[n]||[]).push(r); });
+  ORDER=Object.keys(BYSTU).sort((a,b)=>a.localeCompare(b,"ko"));
+  if(COL.time) ORDER.forEach(n=>BYSTU[n].sort((a,b)=>String(a[idx(COL.time)]).localeCompare(String(b[idx(COL.time)]))));
+
+  const stampOf=n=>{ let mx=0; BYSTU[n].forEach(r=>{ const s=COL.stamp?parseInt(r[idx(COL.stamp)],10):0; if(s>mx)mx=s; });
+    if(!mx){ // 도장 열이 없으면 완료 차시 수로 추정
+      const done=new Set(); BYSTU[n].forEach(r=>{ const ln=lessonNo(COL.act?r[idx(COL.act)]:""); if(ln && (!COL.done || /완료|done|o|y|✔/i.test(r[idx(COL.done)]))) done.add(ln); }); mx=done.size; }
+    return mx; };
+  window._stampOf=stampOf;
+
+  $("#kStu").textContent = COL.name? ORDER.length : "–";
+  $("#kRec").textContent = ROWS.length || "0";
+  const stamps=ORDER.map(stampOf);
+  $("#kAvg").textContent = ORDER.length? (stamps.reduce((a,b)=>a+b,0)/ORDER.length).toFixed(1) : "–";
+  $("#kFull").textContent = stamps.filter(s=>s>=TOTAL_LESSONS).length;
+
+  drawList(); drawLessonChart();
+  $("#setupBox").style.display=(SHEET_ID.includes("여기에")||err)?"block":"none";
+  $("#stuCount").textContent=ORDER.length?ORDER.length+"명":"";
+}
+
+function drawList(){
+  const q=norm($("#q").value); const list=$("#stulist"); list.innerHTML="";
+  const items=ORDER.filter(n=>{ const cls=COL.cls?(BYSTU[n][0][idx(COL.cls)]||""):""; return !q||norm(n+cls).includes(q); });
+  if(!items.length){ list.innerHTML='<div class="placeholder" style="padding:30px 16px">표시할 학생이 없습니다.</div>'; return; }
+  items.forEach(n=>{
+    const cls=COL.cls?(BYSTU[n][0][idx(COL.cls)]||""):"";
+    const st=window._stampOf(n), pct=Math.round(st/TOTAL_LESSONS*100);
+    const caps=new Set(); BYSTU[n].forEach(r=>{ const c=capOf(COL.act?r[idx(COL.act)]:""); if(c)caps.add(c); });
+    const capHtml=Object.keys(CAPS).map(c=>`<span class="cap ${caps.has(c)?'on':''}" style="background:${CAPS[c]}">${c}</span>`).join("");
+    const d=document.createElement("div"); d.className="stu"+(n===CUR?" active":"");
+    d.innerHTML=`<div class="r1"><div class="nm">${esc(n)}${cls?`<small>${esc(cls)}</small>`:""}</div><div class="dc">도장 ${st}/15</div></div>
+      <div class="pbar"><i style="width:${pct}%"></i></div><div class="caps">${capHtml}</div>`;
+    d.onclick=()=>select(n); list.appendChild(d);
+  });
+}
+function select(n){
+  CUR=n; drawList();
+  const cls=COL.cls?(BYSTU[n][0][idx(COL.cls)]||""):"";
+  $("#who").innerHTML=`${esc(n)} <small>${cls?esc(cls)+" · ":""}도장 ${window._stampOf(n)}/15 · ${BYSTU[n].length}건</small>`;
+  $("#pdfCur").style.display="inline-block";
+  const box=$("#records"); box.innerHTML="";
+  BYSTU[n].forEach(r=>{
+    const act=COL.act?r[idx(COL.act)]:"", cap=capOf(act), body=COL.body?r[idx(COL.body)]:"",
+          done=COL.done?/완료|done|o|y|✔/i.test(r[idx(COL.done)]):false, tm=COL.time?r[idx(COL.time)]:"";
+    const div=document.createElement("div"); div.className="rec";
+    div.innerHTML=`<div class="rt">${cap?`<span class="cap2" style="background:${CAPS[cap]}">${cap}</span>`:""}<span class="act">${esc(act)}</span>
+      <span class="dn" style="color:${done?'var(--ok)':'var(--hwalyong)'}">${done?'✓완료':'작성중'}</span>
+      ${tm?`<span style="font-size:11px;color:var(--muted)">${esc(tm)}</span>`:""}</div>
+      ${body?`<div class="body">${esc(body)}</div>`:""}`;
+    box.appendChild(div);
+  });
+}
+function drawLessonChart(){
+  const counts={}; for(let i=1;i<=TOTAL_LESSONS;i++) counts[i]=new Set();
+  ROWS.forEach(r=>{ const ln=lessonNo(COL.act?r[idx(COL.act)]:""); const nm=COL.name?r[idx(COL.name)]:""; if(ln&&counts[ln]) counts[ln].add(nm); });
+  const max=Math.max(1,...Object.values(counts).map(s=>s.size));
+  $("#lessonChart").innerHTML=Object.keys(counts).map(k=>{
+    const v=counts[k].size, pct=Math.round(v/max*100);
+    return `<div class="barrow"><div class="lb">${String(k).padStart(2,'0')}차시</div><div class="bar"><i style="width:${pct}%"></i></div><div class="v">${v}</div></div>`;
+  }).join("");
+}
+
+/* ===== PDF ===== */
+function renderPrint(names){
+  const today=new Date().toLocaleDateString("ko-KR");
+  $("#printArea").innerHTML=names.map(n=>{
+    const cls=COL.cls?(BYSTU[n][0][idx(COL.cls)]||""):"";
+    const recs=BYSTU[n].map(r=>{
+      const act=COL.act?r[idx(COL.act)]:"", body=COL.body?r[idx(COL.body)]:"",
+            done=COL.done?/완료|done|o|y|✔/i.test(r[idx(COL.done)]):false;
+      return `<div class="p-rec"><div class="rt">${esc(act)} · ${done?'완료':'작성중'}</div>${body?`<div class="rb">${esc(body)}</div>`:""}</div>`;
+    }).join("");
+    return `<div class="p-student"><div class="p-head"><h2>${esc(n)} · AI 문해력 실험실 누가기록</h2>
+      <div class="sub">${cls?esc(cls)+" · ":""}도장 ${window._stampOf(n)}/15 · 출력일 ${today}</div></div>
+      ${recs}<div class="p-memo"><b>과세특 작성 메모</b></div></div>`;
+  }).join("");
+}
+function printNames(names){ if(!names.length){ alert("출력할 학생이 없습니다."); return; } renderPrint(names); setTimeout(()=>window.print(),60); }
+
+$("#refresh").onclick=load;
+$("#q").oninput=drawList;
+$("#pdfCur").onclick=()=>printNames(CUR?[CUR]:[]);
+$("#pdfAll").onclick=()=>printNames(ORDER);
+window.onafterprint=()=>{$("#printArea").innerHTML="";};
+load();
+</script>
+</body>
+</html>
